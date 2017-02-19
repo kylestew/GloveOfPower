@@ -9,13 +9,13 @@
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "bleosc/BLEConnector.m"
-            timestampString = "509166728.333642"
+            filePath = "bleosc/bleoscProcess.m"
+            timestampString = "509234560.586636"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "51"
-            endingLineNumber = "51"
-            landmarkName = "-peripheral:didDiscoverCharacteristicsForService:error:"
+            startingLineNumber = "32"
+            endingLineNumber = "32"
+            landmarkName = "-connectorDidUpdateBatteryLevel:"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

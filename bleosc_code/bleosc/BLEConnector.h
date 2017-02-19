@@ -1,9 +1,19 @@
 #import <Foundation/Foundation.h>
+@protocol BLEConnectorDelegate;
 
 @interface BLEConnector : NSObject
 
-@property (nonatomic, assign) BOOL shouldExit;
+@property (nonatomic, assign) id<BLEConnectorDelegate> delegate;
 
-- (void)start;
+- (instancetype)initWithTargetServiceUUID:(NSString*)uuid;
+
+- (void)connect;
+
+@end
+
+@protocol BLEConnectorDelegate <NSObject>
+
+- (void)connectorDidError;
+- (void)connectorDidUpdateBatteryLevel:(int)level;
 
 @end

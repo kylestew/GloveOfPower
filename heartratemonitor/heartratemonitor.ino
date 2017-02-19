@@ -69,20 +69,22 @@ void setup(void) {
     error(F("Could not set device name?"));
   }
 
-  /* Add the Service definition */
-  /* Service ID should be 1 */
+  // Custom service definition
   Serial.println(F("Adding the Service definition (UUID): "));
   success = ble.sendCommandWithIntReply(F("AT+GATTADDSERVICE=UUID128=84-F2-0A-FF-A7-3A-4F-E6-85-0B-BD-ED-53-F7-AC-2A"), &serviceId);
   if (!success) {
     error(F("Could not add service"));
   }
 
+  // add battery service
+  ble.sendCommandCheckOK(F("AT+BLEBATTEN=1"));
+
   // IMU
   // DIGITAL
 
   // ANALOG inputs characteristic
   Serial.println(F("Adding the characteristic"));
-  success = ble.sendCommandWithIntReply(F("AT+GATTADDCHAR=UUID=0x0002,PROPERTIES=0x10,MIN_LEN=1,MAX_LEN=4,VALUE=4,DESCRIPTION=analogs"), &analogInputsId);
+  success = ble.sendCommandWithIntReply(F("AT+GATTADDCHAR=UUID=0x0002,PROPERTIES=0x10,MIN_LEN=4,MAX_LEN=4,VALUE=0,DESCRIPTION=analogs"), &analogInputsId);
   if (!success) {
     error(F("Could not add characteristic"));
   }
@@ -99,10 +101,6 @@ void setup(void) {
   Serial.print(F("Adding Service UUID to the advertising payload: "));
   ble.sendCommandCheckOK( F("AT+GAPSETADVDATA=02-01-06-11-06-2A-AC-F7-53-ED-BD-0B-85-E6-4F-3A-A7-FF-0A-F2-84"));
 
-  // success = ble.sendCommandWithIntReply(F("AT+GATTADDSERVICE=UUID128=84-F2-0A-FF-A7-3A-4F-E6-85-0B-BD-ED-53-F7-AC-2A"), &hrmServiceId);
-
-
-
   /* Reset the device for the new service setting changes to take effect */
   Serial.print(F("Performing a SW reset (service changes require a reset): "));
   ble.reset();
@@ -111,6 +109,12 @@ void setup(void) {
 }
 
 void loop(void) {
+
+
+  // TODO: every so often send battery updates
+  ble.println(F("AT+BLEBATTVAL=72"));
+
+
   /* Command is sent when \n (\r) or println is called */
   /* AT+GATTCHAR=CharacteristicID,value */
   ble.print(F("AT+GATTCHAR="));
@@ -123,11 +127,12 @@ void loop(void) {
 
 
 
+
   /* Check if command executed OK */
   if (!ble.waitForOK()) {
     Serial.println(F("Failed to get response!"));
   }
 
   /* Delay before next measurement update */
-  delay(200);
+  delay(2000);
 }

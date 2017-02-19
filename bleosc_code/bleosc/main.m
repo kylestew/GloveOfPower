@@ -1,6 +1,6 @@
 #import <Foundation/Foundation.h>
 
-#import "BLEConnector.h"
+#import "bleoscProcess.h"
 
 void SignalHandler(int signum) { NSLog(@"user did: %u", signum); }
 
@@ -24,7 +24,7 @@ int main(int argc, const char * argv[]) {
         
 //            printf("Attempting to connect to %s...\n", [deviceName UTF8String]);
             
-            BLEConnector* main = [BLEConnector new];
+            bleoscProcess* main = [bleoscProcess new];
             [main start];
         
             // keep alive forever

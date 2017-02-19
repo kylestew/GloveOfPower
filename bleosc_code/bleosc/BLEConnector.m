@@ -7,37 +7,40 @@
 @property (nonatomic, strong) CBPeripheral* peripheral;
 
 @property (nonatomic, strong) CBUUID* serviceUUID;
+@property (nonatomic, strong) CBUUID* batteryServiceUUID;
+@property (nonatomic, strong) CBUUID* batteryLevelCharacteristic;
+
+@property (nonatomic, strong) NSMutableDictionary* descriptions;
 
 @end
 
 @implementation BLEConnector
 
-- (instancetype)init {
+- (instancetype)initWithTargetServiceUUID:(NSString*)uuid {
     self = [super init];
     if (self) {
         self.manager = [[CBCentralManager alloc] initWithDelegate:self queue:nil];
+        self.serviceUUID = [CBUUID UUIDWithString:uuid];
+        self.descriptions = [NSMutableDictionary dictionary];
         
-//        self.serviceUUID = [CBUUID UUIDWithString:@"180D"];
-        self.serviceUUID = [CBUUID UUIDWithString:@"84F20AFF-A73A-4FE6-850B-BDED53F7AC2A"];
-        
-        
+        self.batteryServiceUUID = [CBUUID UUIDWithString:@"180F"];
+        self.batteryLevelCharacteristic = [CBUUID UUIDWithString:@"2A1B"];
     }
     return self;
 }
 
-- (void)start {
-    // TODO: broadcast properly from BLE device the correct UUID in advertisiment
-//    [self.manager scanForPeripheralsWithServices:nil options:nil];
+- (void)connect {
+    // only look for advertised service
     [self.manager scanForPeripheralsWithServices:@[ self.serviceUUID ] options:nil];
 }
 
 #pragma mark - CBPeripheral Delegate
 - (void)peripheral:(CBPeripheral*)peripheral didDiscoverServices:(NSError *)error {
     for (CBService* service in peripheral.services) {
-        NSLog(@"Service found with UUID: %@", service.UUID);
-        
-        // only interested in our special serviec
+        // only interested in the original service we started looking for
         if ([service.UUID isEqual:self.serviceUUID]) {
+            [peripheral discoverCharacteristics:nil forService:service];
+        } else if ([service.UUID isEqual:self.batteryServiceUUID]) {
             [peripheral discoverCharacteristics:nil forService:service];
         }
     }
@@ -45,52 +48,97 @@
 
 - (void)peripheral:(CBPeripheral*)peripheral didDiscoverCharacteristicsForService:(CBService*)service error:(NSError*)error {
     if ([service.UUID isEqual:self.serviceUUID]) {
-        
         for (CBCharacteristic *character in service.characteristics) {
-            if ([character.UUID isEqual:[CBUUID UUIDWithString:@"0002"]]) {
-                [peripheral setNotifyValue:YES forCharacteristic:character];
-            }
+            
+            NSLog(@"Characteristic found with UUID: %@", character.UUID);
+            [peripheral discoverDescriptorsForCharacteristic:character];
+//            [peripheral setNotifyValue:YES forCharacteristic:character];
+            
         }
         
+    } else if ([service.UUID isEqual:self.batteryServiceUUID]) {
+        for (CBCharacteristic *character in service.characteristics) {
+        
+            NSLog(@"Characteristic found with UUID: %@", character.UUID);
+            [peripheral setNotifyValue:YES forCharacteristic:character];
+        
+        }
     }
 }
 
-- (void) peripheral:(CBPeripheral *)aPeripheral didUpdateValueForCharacteristic:(CBCharacteristic *)characteristic error:(NSError *)error {
-    
-    if ([characteristic.UUID isEqual:[CBUUID UUIDWithString:@"2A37"]]) {
-        if (characteristic.value || !error) {
-            
-            NSData* data =characteristic.value;
-            
-            const uint8_t *reportData = [data bytes];
-            uint16_t bpm = 0;
-            
-            if ((reportData[0] & 0x01) == 0)
-            {
-                /* uint8 bpm */
-                bpm = reportData[1];
-            }
-            else
-            {
-                /* uint16 bpm */
-                bpm = CFSwapInt16LittleToHost(*(uint16_t *)(&reportData[1]));
-            }
-            
-            NSLog(@"VALUE: %hu", bpm);
-            
-        }
+- (void)peripheral:(CBPeripheral *)peripheral didDiscoverDescriptorsForCharacteristic:(CBCharacteristic *)characteristic error:(nullable NSError *)error {
+    for (CBDescriptor *desc in characteristic.descriptors) {
+        // extract value - will fire callback
+        [peripheral readValueForDescriptor:desc];
     }
+}
+
+- (void)peripheral:(CBPeripheral *)peripheral didUpdateValueForDescriptor:(CBDescriptor *)descriptor error:(NSError *)error {
+    
+    if ([descriptor.UUID isEqual:[CBUUID UUIDWithString:CBUUIDCharacteristicUserDescriptionString]]) {
+        NSLog(@"Found description \"%@\" for %@", descriptor.value, descriptor.characteristic.UUID);
+        self.descriptions[descriptor.characteristic.UUID] = descriptor.value;
+    }
+    
+    if ([descriptor.UUID isEqual:[CBUUID UUIDWithString:CBUUIDClientCharacteristicConfigurationString]]) {
+        NSLog(@"Found configuration \"%@\" for %@", descriptor.value, descriptor.characteristic.UUID);
+//        self.descriptions[descriptor.characteristic.UUID] = descriptor.value;
+    }
+    
+}
+
+- (void)peripheral:(CBPeripheral *)aPeripheral didUpdateValueForCharacteristic:(CBCharacteristic *)characteristic error:(NSError *)error {
+    if (!characteristic.value || error) {
+        NSLog(@"ERROR getting value update from characteristic: %@", error.localizedDescription);
+        return;
+    }
+    
+    if ([characteristic.UUID isEqual:self.batteryLevelCharacteristic]) {
+        // BATTERTY LEVEL
+        // uint8
+        const uint8_t* data = [characteristic.value bytes];
+        int level = data[0];
+        [self.delegate connectorDidUpdateBatteryLevel:level];
+    }
+    
+    
+    // TODO: have no clue how to unwrap large arrays!!!
+    
+    
+//    if ([characteristic.UUID isEqual:[CBUUID UUIDWithString:@"2A37"]]) {
+//        if (characteristic.value || !error) {
+//            
+//            NSData* data =characteristic.value;
+//            
+//            const uint8_t *reportData = [data bytes];
+//            uint16_t bpm = 0;
+//            
+//            if ((reportData[0] & 0x01) == 0)
+//            {
+//                /* uint8 bpm */
+//                bpm = reportData[1];
+//            }
+//            else
+//            {
+//                /* uint16 bpm */
+//                bpm = CFSwapInt16LittleToHost(*(uint16_t *)(&reportData[1]));
+//            }
+//            
+//            NSLog(@"VALUE: %hu", bpm);
+//            
+//        }
+//    }
     
 }
 
 #pragma mark - CBCentralManager Delegate
 - (void)centralManagerDidUpdateState:(CBCentralManager *)central {
-    self.shouldExit = ![self isLECapableHardware];
+    if (![self isLECapableHardware])
+        [self.delegate connectorDidError];
 }
 
 - (void)centralManager:(CBCentralManager *)central didDiscoverPeripheral:(CBPeripheral *)aPeripheral advertisementData:(NSDictionary *)advertisementData RSSI:(NSNumber *)RSSI {
     
-    // HACK: assuming there is only one
     NSLog(@"%@", aPeripheral);
     
     // attemp to connect
@@ -109,10 +157,12 @@
 
 - (void)centralManager:(CBCentralManager *)central didDisconnectPeripheral:(CBPeripheral *)peripheral error:(NSError *)error {
     NSLog(@"DISCONNECTED: %@", peripheral);
+    [self.delegate connectorDidError];
 }
 
 - (void)centralManager:(CBCentralManager *)central didFailToConnectPeripheral:(CBPeripheral *)aPeripheral error:(NSError *)error {
     NSLog(@"ERROR: %@", error);
+    [self.delegate connectorDidError];
 }
 
 #pragma mark - Utils
