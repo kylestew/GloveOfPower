@@ -1,6 +1,0 @@
-framework module Pods_bleosc {
-  umbrella header "Pods-bleosc-umbrella.h"
-
-  export *
-  module * { export * }
-}

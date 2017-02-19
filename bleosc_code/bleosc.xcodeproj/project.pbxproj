@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		8C42E11043B755700184BDD4 /* Pods_bleosc.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4042E3A4042D586F2B241D4 /* Pods_bleosc.framework */; };
+		72A2D9E727D4822FA55E63B4 /* libPods-bleosc.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F98F99ED8A79DB0490D27EC2 /* libPods-bleosc.a */; };
 		FF71C5331E58D5D200219283 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = FF71C5321E58D5D200219283 /* main.m */; };
 		FF71C53B1E58D64500219283 /* CoreBluetooth.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FF71C53A1E58D64500219283 /* CoreBluetooth.framework */; };
 		FF71C53E1E58D6C600219283 /* BLEConnector.m in Sources */ = {isa = PBXBuildFile; fileRef = FF71C53D1E58D6C600219283 /* BLEConnector.m */; };
@@ -29,7 +29,7 @@
 /* Begin PBXFileReference section */
 		45D975DD1C8901079F6E368D /* Pods-bleosc.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-bleosc.debug.xcconfig"; path = "Pods/Target Support Files/Pods-bleosc/Pods-bleosc.debug.xcconfig"; sourceTree = "<group>"; };
 		A1CC667685AC95C092F79477 /* Pods-bleosc.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-bleosc.release.xcconfig"; path = "Pods/Target Support Files/Pods-bleosc/Pods-bleosc.release.xcconfig"; sourceTree = "<group>"; };
-		B4042E3A4042D586F2B241D4 /* Pods_bleosc.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_bleosc.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		F98F99ED8A79DB0490D27EC2 /* libPods-bleosc.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-bleosc.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		FF71C52F1E58D5D200219283 /* bleosc */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = bleosc; sourceTree = BUILT_PRODUCTS_DIR; };
 		FF71C5321E58D5D200219283 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		FF71C53A1E58D64500219283 /* CoreBluetooth.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreBluetooth.framework; path = System/Library/Frameworks/CoreBluetooth.framework; sourceTree = SDKROOT; };
@@ -46,7 +46,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				FF71C53B1E58D64500219283 /* CoreBluetooth.framework in Frameworks */,
-				8C42E11043B755700184BDD4 /* Pods_bleosc.framework in Frameworks */,
+				72A2D9E727D4822FA55E63B4 /* libPods-bleosc.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -97,7 +97,7 @@
 			children = (
 				FFBEB3731E5A4E14001A3B3D /* CocoaAsyncSocket.framework */,
 				FF71C53A1E58D64500219283 /* CoreBluetooth.framework */,
-				B4042E3A4042D586F2B241D4 /* Pods_bleosc.framework */,
+				F98F99ED8A79DB0490D27EC2 /* libPods-bleosc.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";

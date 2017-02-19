@@ -14,10 +14,10 @@
             buildForArchiving = "YES">
             <BuildableReference
                BuildableIdentifier = 'primary'
-               BlueprintIdentifier = '708FC2B08C8CF11EB4D5E8B7CACF6B66'
+               BlueprintIdentifier = '5BFC7049B2ED022824E6DDAFCCE0CE40'
                BlueprintName = 'OSCKit'
                ReferencedContainer = 'container:Pods.xcodeproj'
-               BuildableName = 'OSCKit.framework'>
+               BuildableName = 'libOSCKit.a'>
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>

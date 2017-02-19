@@ -14,10 +14,10 @@
             buildForArchiving = "YES">
             <BuildableReference
                BuildableIdentifier = 'primary'
-               BlueprintIdentifier = '98F1B23E815D6C47A14A3B79E9E5ACB2'
+               BlueprintIdentifier = 'FFCF4B26E236F0CB012AD543AA30C00A'
                BlueprintName = 'Pods-bleosc'
                ReferencedContainer = 'container:Pods.xcodeproj'
-               BuildableName = 'Pods-bleosc.framework'>
+               BuildableName = 'libPods-bleosc.a'>
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>

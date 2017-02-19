@@ -15,5 +15,6 @@
 
 - (void)connectorDidError;
 - (void)connectorDidUpdateBatteryLevel:(int)level;
+//- (void)connectorDidUpdateValue:(int)value forSomething:
 
 @end

@@ -27,8 +27,8 @@
 }
 
 - (void)connectorDidUpdateBatteryLevel:(int)level {
-//    OSCMessage* mess = [OSCMessage to:@"/battery" with:@[ @(level) ]];
-//    [self.client sendMessage:mess to:@"udp://localhost:4298"];
+    OSCMessage* mess = [OSCMessage to:@"/battery" with:@[ @(level) ]];
+    [self.client sendMessage:mess to:@"udp://localhost:4298"];
 }
 
 @end
