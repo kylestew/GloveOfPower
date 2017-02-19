@@ -28,7 +28,7 @@ Bounce bounce3 = Bounce();
 Bounce bounceX = Bounce();
 
 /* IMU */
-#define IMU_REFRESH_PERIOD 250 // ms
+#define IMU_REFRESH_PERIOD 120 // ms
 // Declination of North Park, San Diego (32°44'55.0"N 117°07'48.1"W) is
 //   11.62° E  ± 0.33° on 2016-10-08
 //   http://www.ngdc.noaa.gov/geomag-web/#declination
