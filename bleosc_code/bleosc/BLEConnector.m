@@ -11,6 +11,7 @@
 @property (nonatomic, strong) CBUUID* batteryLevelCharacteristic;
 
 @property (nonatomic, strong) NSMutableDictionary* descriptions;
+@property (nonatomic, strong) NSMutableDictionary* formats;
 
 @end
 
@@ -21,7 +22,9 @@
     if (self) {
         self.manager = [[CBCentralManager alloc] initWithDelegate:self queue:nil];
         self.serviceUUID = [CBUUID UUIDWithString:uuid];
+        
         self.descriptions = [NSMutableDictionary dictionary];
+        self.formats = [NSMutableDictionary dictionary];
         
         self.batteryServiceUUID = [CBUUID UUIDWithString:@"180F"];
         self.batteryLevelCharacteristic = [CBUUID UUIDWithString:@"2A1B"];
@@ -52,7 +55,7 @@
             
             NSLog(@"Characteristic found with UUID: %@", character.UUID);
             [peripheral discoverDescriptorsForCharacteristic:character];
-//            [peripheral setNotifyValue:YES forCharacteristic:character];
+            [peripheral setNotifyValue:YES forCharacteristic:character];
             
         }
         
@@ -74,17 +77,15 @@
 }
 
 - (void)peripheral:(CBPeripheral *)peripheral didUpdateValueForDescriptor:(CBDescriptor *)descriptor error:(NSError *)error {
-    
     if ([descriptor.UUID isEqual:[CBUUID UUIDWithString:CBUUIDCharacteristicUserDescriptionString]]) {
         NSLog(@"Found description \"%@\" for %@", descriptor.value, descriptor.characteristic.UUID);
         self.descriptions[descriptor.characteristic.UUID] = descriptor.value;
+    } else if ([descriptor.UUID isEqual:[CBUUID UUIDWithString:CBUUIDCharacteristicFormatString]]) {
+        // grab format char
+        const uint8_t* data = [descriptor.value bytes];
+        NSLog(@"Found format %u for %@", data[0], descriptor.characteristic.UUID);
+        self.formats[descriptor.characteristic.UUID] = @(data[0]);
     }
-    
-    if ([descriptor.UUID isEqual:[CBUUID UUIDWithString:CBUUIDClientCharacteristicConfigurationString]]) {
-        NSLog(@"Found configuration \"%@\" for %@", descriptor.value, descriptor.characteristic.UUID);
-//        self.descriptions[descriptor.characteristic.UUID] = descriptor.value;
-    }
-    
 }
 
 - (void)peripheral:(CBPeripheral *)aPeripheral didUpdateValueForCharacteristic:(CBCharacteristic *)characteristic error:(NSError *)error {
@@ -99,6 +100,20 @@
         const uint8_t* data = [characteristic.value bytes];
         int level = data[0];
         [self.delegate connectorDidUpdateBatteryLevel:level];
+    } else {
+        NSString* description = self.descriptions[characteristic.UUID];
+        NSNumber* format = self.formats[characteristic.UUID];
+        if (format && description) {
+            
+            NSLog(@"PROC value for %@ - %@", description, format);
+            const uint8_t* data = [characteristic.value bytes];
+            uint16_t value = data[1] << 8 | data[0];
+//            NSLog(@"%ld", value);
+            [self.delegate connectorDidUpdateValue:value forDescription:description];
+            
+        } else {
+            NSLog(@"No description/format registered for %@ - unable to process", characteristic.UUID);
+        }
     }
     
     
