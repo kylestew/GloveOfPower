@@ -9,7 +9,7 @@
 			"modernui" : 1
 		}
 ,
-		"rect" : [ 527.0, 159.0, 1852.0, 1082.0 ],
+		"rect" : [ 1349.0, 392.0, 624.0, 369.0 ],
 		"bglocked" : 0,
 		"openinpresentation" : 1,
 		"default_fontsize" : 12.0,
@@ -100,7 +100,8 @@
 					"presentation" : 1,
 					"presentation_rect" : [ 209.5, 27.0, 23.0, 20.0 ],
 					"style" : "",
-					"text" : "B4"
+					"text" : "X",
+					"textjustification" : 1
 				}
 
 			}
@@ -141,7 +142,7 @@
 					"parameter_enable" : 0,
 					"patching_rect" : [ 1528.0, 513.0, 20.0, 140.0 ],
 					"presentation" : 1,
-					"presentation_rect" : [ 211.0, 49.0, 20.0, 62.0 ],
+					"presentation_rect" : [ 211.0, 49.0, 20.0, 58.0 ],
 					"size" : 1023.0,
 					"style" : ""
 				}
@@ -440,7 +441,7 @@
 					"parameter_enable" : 0,
 					"patching_rect" : [ 1397.0, 513.0, 20.0, 140.0 ],
 					"presentation" : 1,
-					"presentation_rect" : [ 182.0, 49.0, 20.0, 62.0 ],
+					"presentation_rect" : [ 182.0, 49.0, 20.0, 58.0 ],
 					"size" : 1023.0,
 					"style" : ""
 				}
