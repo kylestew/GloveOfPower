@@ -105,10 +105,9 @@
         NSNumber* format = self.formats[characteristic.UUID];
         if (format && description) {
             
-            NSLog(@"PROC value for %@ - %@", description, format);
             const uint8_t* data = [characteristic.value bytes];
             uint16_t value = data[1] << 8 | data[0];
-//            NSLog(@"%ld", value);
+            NSLog(@"PROC value for %@ - %hu", description, value);
             [self.delegate connectorDidUpdateValue:value forDescription:description];
             
         } else {
