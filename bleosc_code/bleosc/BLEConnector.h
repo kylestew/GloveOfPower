@@ -8,6 +8,7 @@
 - (instancetype)initWithTargetServiceUUID:(NSString*)uuid;
 
 - (void)connect;
+- (void)disconnect;
 
 @end
 
@@ -15,6 +16,7 @@
 
 - (void)connectorDidError;
 - (void)connectorDidUpdateBatteryLevel:(int)level;
+- (void)connectorDidUpdateIMUWithYaw:(float)yaw andPitch:(float)pitch andRoll:(float)roll;
 - (void)connectorDidUpdateValue:(int)value forDescription:(NSString*)description;
 
 @end

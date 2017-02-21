@@ -9,6 +9,7 @@
 @property (nonatomic, strong) CBUUID* serviceUUID;
 @property (nonatomic, strong) CBUUID* batteryServiceUUID;
 @property (nonatomic, strong) CBUUID* batteryLevelCharacteristic;
+@property (nonatomic, strong) CBUUID* imuCharacteristic;
 
 @property (nonatomic, strong) NSMutableDictionary* descriptions;
 @property (nonatomic, strong) NSMutableDictionary* formats;
@@ -28,6 +29,7 @@
         
         self.batteryServiceUUID = [CBUUID UUIDWithString:@"180F"];
         self.batteryLevelCharacteristic = [CBUUID UUIDWithString:@"2A1B"];
+        self.imuCharacteristic = [CBUUID UUIDWithString:@"B102"];
     }
     return self;
 }
@@ -35,6 +37,10 @@
 - (void)connect {
     // only look for advertised service
     [self.manager scanForPeripheralsWithServices:@[ self.serviceUUID ] options:nil];
+}
+
+- (void)disconnect {
+    [self.manager cancelPeripheralConnection:self.peripheral];
 }
 
 #pragma mark - CBPeripheral Delegate
@@ -88,6 +94,11 @@
     }
 }
 
+union U8f {
+    uint8_t byte[4];
+    float f;
+};
+
 - (void)peripheral:(CBPeripheral *)aPeripheral didUpdateValueForCharacteristic:(CBCharacteristic *)characteristic error:(NSError *)error {
     if (!characteristic.value || error) {
         NSLog(@"ERROR getting value update from characteristic: %@", error.localizedDescription);
@@ -100,6 +111,33 @@
         const uint8_t* data = [characteristic.value bytes];
         int level = data[0];
         [self.delegate connectorDidUpdateBatteryLevel:level];
+    } else if ([characteristic.UUID isEqual:self.imuCharacteristic]) {
+        
+        const uint8_t* data = [characteristic.value bytes];
+        
+        union U8f yaw;
+        yaw.byte[0] = data[0];
+        yaw.byte[1] = data[1];
+        yaw.byte[2] = data[2];
+        yaw.byte[3] = data[3];
+        
+        union U8f pitch;
+        pitch.byte[0] = data[4];
+        pitch.byte[1] = data[5];
+        pitch.byte[2] = data[6];
+        pitch.byte[3] = data[7];
+        
+        union U8f roll;
+        roll.byte[0] = data[8];
+        roll.byte[1] = data[9];
+        roll.byte[2] = data[10];
+        roll.byte[3] = data[11];
+        
+        [self disconnect];
+        
+        NSLog(@"Y: %f, P: %f, R: %f", yaw.f, pitch.f, roll.f);
+        [self.delegate connectorDidUpdateIMUWithYaw:yaw.f andPitch:pitch.f andRoll:roll.f];
+        
     } else {
         NSString* description = self.descriptions[characteristic.UUID];
         NSNumber* format = self.formats[characteristic.UUID];
@@ -171,12 +209,12 @@
 
 - (void)centralManager:(CBCentralManager *)central didDisconnectPeripheral:(CBPeripheral *)peripheral error:(NSError *)error {
     NSLog(@"DISCONNECTED: %@", peripheral);
-    [self.delegate connectorDidError];
+//    [self.delegate connectorDidError];
 }
 
 - (void)centralManager:(CBCentralManager *)central didFailToConnectPeripheral:(CBPeripheral *)aPeripheral error:(NSError *)error {
     NSLog(@"ERROR: %@", error);
-    [self.delegate connectorDidError];
+//    [self.delegate connectorDidError];
 }
 
 #pragma mark - Utils

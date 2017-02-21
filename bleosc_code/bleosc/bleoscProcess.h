@@ -5,5 +5,6 @@
 @property (nonatomic, assign) BOOL shouldExit;
 
 - (void)start;
+- (void)stop;
 
 @end

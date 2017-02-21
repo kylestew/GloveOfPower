@@ -2,7 +2,14 @@
 
 #import "bleoscProcess.h"
 
-void SignalHandler(int signum) { NSLog(@"user did: %u", signum); }
+static bleoscProcess* proc;
+
+void SignalHandler(int signum) {
+    // disconnect from BLE process
+    [proc stop];
+    
+    exit(1);
+}
 
 int main(int argc, const char * argv[]) {
     @autoreleasepool {
@@ -24,14 +31,14 @@ int main(int argc, const char * argv[]) {
         
 //            printf("Attempting to connect to %s...\n", [deviceName UTF8String]);
             
-            bleoscProcess* main = [bleoscProcess new];
-            [main start];
+            proc = [bleoscProcess new];
+            [proc start];
         
             // keep alive forever
             NSRunLoop* runLoop = [NSRunLoop currentRunLoop];
             
             // enter run loop
-            while((!(main.shouldExit)) && (([runLoop runMode:NSDefaultRunLoopMode beforeDate:[NSDate dateWithTimeIntervalSinceNow:2]])));
+            while((!(proc.shouldExit)) && (([runLoop runMode:NSDefaultRunLoopMode beforeDate:[NSDate dateWithTimeIntervalSinceNow:2]])));
             
 //        }
     }

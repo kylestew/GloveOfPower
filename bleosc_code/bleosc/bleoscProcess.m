@@ -22,6 +22,10 @@
     [self.connector connect];
 }
 
+- (void)stop {
+    [self.connector disconnect];
+}
+
 #pragma mark - BLEConnectorDelegate
 - (void)connectorDidError {
     // TODO: shutdown cleanly?
@@ -31,6 +35,11 @@
 
 - (void)connectorDidUpdateBatteryLevel:(int)level {
     [self connectorDidUpdateValue:level forDescription:@"/battery"];
+}
+
+- (void)connectorDidUpdateIMUWithYaw:(float)yaw andPitch:(float)pitch andRoll:(float)roll {
+    OSCMessage* mess = [OSCMessage to:@"/imu" with:@[ @(yaw), @(pitch), @(roll) ]];
+    [self.client sendMessage:mess to:_udpAddr];
 }
 
 - (void)connectorDidUpdateValue:(int)value forDescription:(NSString *)description {
