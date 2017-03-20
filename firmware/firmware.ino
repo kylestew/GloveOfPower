@@ -39,11 +39,12 @@ Adafruit_BLEGatt gatt(ble);
 MPU9250 imu;
 
 // === UPDATE TUNING ===
-#define ANALOG_VALUE_DELTA        3
+#define UPDATE_LOOP_DELAY         20
+#define ANALOG_VALUE_DELTA        2
 #define ANALOG_POT_ZERO_THRESHOLD 14
-#define UPDATE_BATT_PERC_MILLIS   12000
-#define BUTTON_DEBOUNCE_DELAY     20
-#define IMU_VALUE_DELTA           2
+#define UPDATE_BATT_PERC_MILLIS   10000
+#define BUTTON_DEBOUNCE_DELAY     12
+#define IMU_VALUE_DELTA           1
 
 // === GLOBALS ===
 int32_t serviceId;
@@ -95,7 +96,7 @@ void error(const __FlashStringHelper*err) {
 void updateAnalogValue(uint16_t pin, int delta, int idx) {
   uint16_t value = (uint16_t)analogRead(pin);
   if (value < ANALOG_POT_ZERO_THRESHOLD) value = 0;
-  if (abs(analogValues[idx] - value) > ANALOG_VALUE_DELTA) {
+  if (abs(analogValues[idx] - value) > delta) {
     gatt.setChar(analogCharIds[idx], (uint16_t)value);
     analogValues[idx] = value;
   }
@@ -113,8 +114,9 @@ void loop(void) {
   // update battery status every so often
   if (millis() > lastBattUpdateMillis + UPDATE_BATT_PERC_MILLIS) {
     float measuredvbat = analogRead(BATT_TEST);
+    Serial.println(measuredvbat);
     measuredvbat = measuredvbat - 420; // 420 = 0%
-    measuredvbat = measuredvbat / 2.40; // 660 = 100% (660-420 = 240)
+    measuredvbat = measuredvbat / 2.40; // 660 = 100% (660-420 = 240 = 2.4)
     if (measuredvbat > 100) measuredvbat = 100;
     if (measuredvbat < 0) measuredvbat = 0;
     ble.print(F("AT+BLEBATTVAL="));
@@ -125,7 +127,7 @@ void loop(void) {
   // analogs
   updateAnalogValue(POT_0, ANALOG_VALUE_DELTA, 0);
   updateAnalogValue(POT_1, ANALOG_VALUE_DELTA, 1);
-  updateAnalogValue(PHOTO_RES, ANALOG_VALUE_DELTA * 12, 2);
+  updateAnalogValue(PHOTO_RES, ANALOG_VALUE_DELTA * 4, 2);
   updateAnalogValue(PRESSURE_RES, ANALOG_VALUE_DELTA, 3);
 
   // digitals
@@ -149,7 +151,7 @@ void loop(void) {
       gatt.setChar(imuCharId, data, 12);
   }
 
-  delay(20);
+  delay(UPDATE_LOOP_DELAY);
 }
 
 // === BLE ===
@@ -221,9 +223,11 @@ void beginIMU() {
   Wire.begin();
 
   // Read the WHO_AM_I register, this is a good test of communication
-  byte c = imu.readByte(MPU9250_ADDRESS, WHO_AM_I_MPU9250);
-  Serial.print("MPU9250 "); Serial.print("I AM "); Serial.print(c, HEX);
-  Serial.print(" I should be "); Serial.println(0x71, HEX);
+  if (SERIAL_DEBUG) {
+    byte c = imu.readByte(MPU9250_ADDRESS, WHO_AM_I_MPU9250);
+    Serial.print("MPU9250 "); Serial.print("I AM "); Serial.print(c, HEX);
+    Serial.print(" I should be "); Serial.println(0x71, HEX);
+  }
 
   // Start by performing self test and reporting values
   imu.MPU9250SelfTest(imu.SelfTest);

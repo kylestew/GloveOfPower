@@ -133,9 +133,7 @@ union U8f {
         roll.byte[2] = data[10];
         roll.byte[3] = data[11];
         
-        [self disconnect];
-        
-        NSLog(@"Y: %f, P: %f, R: %f", yaw.f, pitch.f, roll.f);
+//        NSLog(@"Y: %f, P: %f, R: %f", yaw.f, pitch.f, roll.f);
         [self.delegate connectorDidUpdateIMUWithYaw:yaw.f andPitch:pitch.f andRoll:roll.f];
         
     } else {
@@ -145,42 +143,13 @@ union U8f {
             
             const uint8_t* data = [characteristic.value bytes];
             uint16_t value = data[1] << 8 | data[0];
-            NSLog(@"PROC value for %@ - %hu", description, value);
+//            NSLog(@"PROC value for %@ - %hu", description, value);
             [self.delegate connectorDidUpdateValue:value forDescription:description];
             
         } else {
             NSLog(@"No description/format registered for %@ - unable to process", characteristic.UUID);
         }
     }
-    
-    
-    // TODO: have no clue how to unwrap large arrays!!!
-    
-    
-//    if ([characteristic.UUID isEqual:[CBUUID UUIDWithString:@"2A37"]]) {
-//        if (characteristic.value || !error) {
-//            
-//            NSData* data =characteristic.value;
-//            
-//            const uint8_t *reportData = [data bytes];
-//            uint16_t bpm = 0;
-//            
-//            if ((reportData[0] & 0x01) == 0)
-//            {
-//                /* uint8 bpm */
-//                bpm = reportData[1];
-//            }
-//            else
-//            {
-//                /* uint16 bpm */
-//                bpm = CFSwapInt16LittleToHost(*(uint16_t *)(&reportData[1]));
-//            }
-//            
-//            NSLog(@"VALUE: %hu", bpm);
-//            
-//        }
-//    }
-    
 }
 
 #pragma mark - CBCentralManager Delegate
